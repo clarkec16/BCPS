@@ -185,7 +185,7 @@ text(df_graph3$H, c, labels = paste(df_graph3$H,"%"), pos = 4.5)
 ### GRAPH 7 ###
 
 
-### GRAPH 8 ###
+### GRAPH 8 ###sd
 
 
 

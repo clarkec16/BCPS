@@ -1,0 +1,258 @@
+---
+title: "BCPS"
+author: "Clyde Clarke"
+date: "1/8/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r warning=FALSE, include=FALSE}
+library(readxl)
+library(tidyverse)
+library(gapminder)
+```
+
+```{r include=FALSE}
+library(readxl)
+library(tidyverse)
+pre_data <- read_excel("BCPS Covid Data.xlsx", sheet = "Students")
+colnames(pre_data) <- tolower(make.names(colnames(pre_data)))
+```
+
+```{r include=FALSE}
+pre_data_q1 <- pre_data %>% select(c("i.was.happy.with.my.distance.learning.":'...58'))
+
+pre_data_q1 <- pre_data_q1 %>% select(-c("i.did.more.school.work.during.distance.learning.than.i.did.in.my.normal.classroom.":'...22'))
+
+pre_data_q1_filtered <- pre_data_q1[c('...7','...8','...13','...14','...25','...26','...31','...32','...37','...38','...43','...44','...49','...50','...55','...56')]
+
+names(pre_data_q1_filtered) <- make.names(paste(pre_data_q1_filtered[1,],c("1":"16")))
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width = 10, fig.height=6}
+vals <- pre_data_q1_filtered[2,] 
+vals <- vals %>% type_convert()
+vals <- round(vals*100)
+
+counts<- structure(list(
+  
+  A = c(vals$Agree.1,vals$Strongly.Agree.2), 
+  B = c(vals$Agree.3,vals$Strongly.Agree.4),
+  C = c(vals$Agree.5,vals$Strongly.Agree.6),
+  D = c(vals$Agree.7,vals$Strongly.Agree.8), 
+  E = c(vals$Agree.9,vals$Strongly.Agree.10),
+  G = c(vals$Agree.11,vals$Strongly.Agree.12),
+  H = c(vals$Agree.13,vals$Strongly.Agree.14),
+  I = c(vals$Agree.15,vals$Strongly.Agree.16)),
+  
+.Names = c('I was happy with my distance learning',
+        'I knew what I was supposed to do in my classes during distance learning',
+        'I felt comfortable completing school work on my own',
+        'It was easy to work from home',
+        'I learned a lot during distance learning',
+        'I had trouble getting online or had trouble finding a computer to use for lessons.',
+        'My teacher provided help when I needed it',
+        'My teacher seemed comfortable with teaching online'
+  ), 
+  class = "data.frame", 
+  row.names = c(NA, -2L)) #4L=number of numbers in each letter vector#
+
+attach(counts)
+
+
+# barplot
+colors <- c("slategray3","dodgerblue4")
+counts <- counts[, order(colSums(counts))]
+xFun <- function(x) x/2 + c(0, cumsum(x)[-length(x)])
+par(mar=c(5, 30, 0, 0) )  # this sets margins to allow long labels
+par(oma=c(0,0,0,0))
+byc <- barplot(as.matrix(counts), horiz=TRUE, col=colors,
+               # assign `byc`
+               border=FALSE, las=1, xaxt='n',
+               ylim = range(0, 15), xlim = range(0, 110),
+               width = 1.35)
+
+# labels
+labs <- data.frame(x=as.vector(sapply(counts, xFun)),  # apply `xFun` here 
+                   y=rep(byc, each=nrow(counts)),  # use `byc` here
+                   labels=as.vector(apply(counts, 1:2, paste0, "%")), 
+                   stringsAsFactors=FALSE)
+labs$labels[labs$labels %in% paste0(0:(8*100)/100, "%")] <- "" #masks labels <8
+labs$labels[2] = paste0("8","%")
+invisible(sapply(seq(nrow(labs)), function(x)  # `invisible` prevents unneeded console output
+  text(x=labs[x, 1:2], labels=labs[x, 3], cex=.9, font=2, col=0)))
+#adds % to scale
+scale <- seq(0, 100, by = 20)
+axis(side = 1, at = scale, labels = paste0(scale, "%"), cex.axis = 1)
+
+nx = NULL
+
+#this adds gridlines
+#grid(nx = NULL, col = "lightgray", lty = "dotted",lwd = par("lwd"), equilogs = FALSE)
+grid(NULL,NA, lwd=par("lwd"),equilogs=TRUE)
+# legend  (set `xpd=TRUE` to plot beyond margins!)
+legend(0,15,  legend=c("High","Very High"), fill=colors, horiz = T, bty='n', xpd=T) #xpd lets you go outside margin
+```
+
+
+
+```{r echo=FALSE, fig.width = 8, fig.height = 8}
+### DONUT ###
+
+
+df <- data.frame(
+  group = c("Never", "Only a few times", "Weekly", "Daily", "Multiple \n times per day"),
+  value = c(5,28, 34, 27, 6))
+
+par(mar=c(5, 10, 5, 5) )  # this sets margins to allow long labels
+#par(oma=c(0,0,0,0))
+# create labels
+df$label <- paste(df$group,
+                  scales::percent(df$value/sum(df$value), accuracy = 1), sep = "\n")
+
+ggpubr::ggdonutchart(df, "value",
+             label = "label", # add labels
+             color = "white",fill = "group",
+             lab.pos = c("out"), #THIS PLACES DATA LABELS ON OUTSIDE OF DONUT
+             lab.adjust = 1,
+             radius = .3,
+             palette = c("dodgerblue3", "darkorange2", "lightsteelblue4", "goldenrod1", "dodgerblue4")) +
+  theme(legend.position = "none") #DELETES LEGEND
+```
+
+
+```{r echo=FALSE}
+H <- c(18, 29,34,18) # Create the data for the chart.#
+M <- c("Wait for the next time I met with my teacher", 
+       "Ask a classmate",
+       'Ask an adult in your home for help',
+       'Other')
+par(mar=c(5,20,5,0))
+c<-barplot(H, col =c("dodgerblue3", "darkorange2", "lightsteelblue4", "goldenrod1"), names.arg = M, horiz = TRUE, 
+        border = NA,  las=1, 
+        xlim = range(0,100), ylim = range(0,5), axes = FALSE) 
+#THIS DELETES THE X-AXIS#
+text(H, c, labels = scales::percent(H/100,1), pos = 4)
+```
+
+
+```{r echo=FALSE, fig.width = 15, dpi=1000}
+library(dplyr)
+library(ggplot2)
+par(mar=c(5, 0, 5, 0))
+
+df <- data.frame(
+  group = c("Posting written messages online", "Text messages", "Phone calls", "Online learning system", "Online video chat","Blackboard Collaborate"),
+  value = c(32,29, 19, 53, 51,26))
+df %>%
+  ggplot(aes(x=group, y=value)) +
+  geom_segment( aes(x=group, xend=group, y=0, yend=value), color="dodgerblue4") +
+  geom_point( color="goldenrod1", size=4, alpha=0.6) +
+  geom_text(aes(label = paste0(value,"%")), hjust = -1) + 
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.y = element_text(color = 'black'),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.x.bottom = element_blank(),
+    axis.title.y.left = element_blank()
+  )
+```
+
+
+```{r echo=FALSE, fig.cap='Figure, 6: Student Post-Camp Perceptions About Camp (Agree/Strongly Agree) (N=22)'}
+colors<- c("dodgerblue4")
+counts <- structure(list(
+  `Not comfortable at all`= c(35), 
+  `Somewhat uncomfortable`= c(15), 
+  `Somewhat comfortable` = c(23), 
+  `Very comfortable` =c(20), 
+  `Dont know` =c(6)),
+  `I will not be returning for the next school year`= c(3),
+  class = "data.frame", row.names = c(NA, -1L))
+
+
+xFun <- function(x) x/2 + c(0, cumsum(x)[-length(x)])
+counts <- counts[, order(colSums(counts))]
+par(mar=c(3, 20, 1, 0))
+par(oma = c(0,0,0,0))
+byc <- barplot(as.matrix(counts), horiz=TRUE, col=colors,  # assign `byc`
+               border=FALSE, las=1, xaxt='n', ylim = range(0,11))
+
+# labels
+labs <- data.frame(x=as.vector(sapply(counts, xFun)),  # apply `xFun` here 
+                   y=rep(byc, each=nrow(counts)),  # use `byc` here
+                   labels=as.vector(apply(counts, 1:2, paste0, "%")), 
+                   stringsAsFactors=FALSE)
+
+invisible(sapply(seq(nrow(labs)), function(x)  # `invisible` prevents unneeded console output
+  text(x=labs[x, 1:2], labels=labs[x, 3], cex=.9, font=2, col=0)))
+
+```
+
+```{r echo=FALSE, fig.width=15, fig.cap='Figure, 6: Student Post-Camp Perceptions About Camp (Agree/Strongly Agree) (N=22)',dpi = 1000}
+colors<- c("dodgerblue4")
+counts <- structure(list(
+  `My family should get to choose whether I attend in person or continue distance learning.`= c(87), 
+  `It is important to match my class schedule with my brothers and sisters.`= c(45), 
+  `All teaching and learning should remain all online and not in person.` = c(55), 
+  `Some type of in-person learning should occur for all students, even if its only once in a while.` =c(67), 
+  `Some type of in-person learning should occur for all students, even if it's only once in a while.` =c(50)),
+  `I will not be returning for the next school year`= c(3),
+  class = "data.frame", row.names = c(NA, -1L))
+
+
+xFun <- function(x) x/2 + c(0, cumsum(x)[-length(x)])
+counts <- counts[, order(colSums(counts))]
+par(mar=c(3, 40, 1, 10))
+par(oma = c(0,0,0,0))
+byc <- barplot(as.matrix(counts), horiz=TRUE, col=colors,  # assign `byc`
+               border=FALSE, las=1, xaxt='n', ylim = range(0,11))
+
+# labels
+labs <- data.frame(x=as.vector(sapply(counts, xFun)),  # apply `xFun` here 
+                   y=rep(byc, each=nrow(counts)),  # use `byc` here
+                   labels=as.vector(apply(counts, 1:2, paste0, "%")), 
+                   stringsAsFactors=FALSE)
+
+invisible(sapply(seq(nrow(labs)), function(x)  # `invisible` prevents unneeded console output
+  text(x=labs[x, 1:2], labels=labs[x, 3], cex=.9, font=2, col=0)))
+```
+
+
+```{r}
+# Graph 4
+
+M <-c("My family should get to choose whether I attend in person or continue distance learning","It is important to match my class schedule with my brothers and           sisters","All teaching and learning should remain all online and not in person`,    `Some type of in-person learning should occur for all students even if its only once in a while", "Some type of in-person learning should occur for all students even if its only once in a while","I will not be returning for the next school year")
+par(mar=c(5.1, 8, 4, 0))
+
+
+
+H<- c(87,45,55,67,50)
+
+par(las=1)
+bp <- barplot(H, col =c("steelblue4" ),  ylim = range(0,110),
+              names.arg = M, horiz = F,
+              border = NA, xlim = range(0,6), las=1,
+              axes = T, yaxt = "n")
+val <- seq(0, 100, 20)  #creating Y-axis values
+text(bp, H + 6, paste(H, "%", sep="")) #automates data labels
+par(las=1) #positions y-axis labels horizontally
+axis(2, at = val, labels = paste0(val, '%'), family="Arial" ) #add % to Y-axis
+#NOTE: SOMETIMES IT WILL NOT MAKE SENSE TO LABEL X-AXIS, JUST DELETE AXIS LABEL IN THOSE INSTANCES
+```

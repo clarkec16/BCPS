@@ -1,0 +1,50 @@
+---
+title: "Dynamic report"
+output: html_document
+params:
+  n: NA
+  l: NA
+  m: NA
+  p: NA
+---
+```{r echo=TRUE}
+if (params$l == "Vertical Bar")
+  print(params$l)
+  print(as.name(params$l))
+```
+
+```{r}
+# The `params` object is available in the document.
+params$n
+```
+
+```{r}
+  x <- as.numeric(unlist(strsplit(params$m,",")))
+  print(x)
+```
+
+A plot of `params$n` random points.
+
+```{r}
+plot(rnorm(params$n), rnorm(params$n))
+```
+
+
+```{r echo=FALSE}
+par(mar=c(10, 5, 2, 0))
+values <- as.numeric(unlist(strsplit(params$m,",")))
+labels <- unlist(strsplit(params$p,","))
+
+H <- c(values) # Create the data for the chart.#
+M <- c(labels)
+
+bp <- barplot(H, col =c("dodgerblue3" ),  ylim = range(0,110),
+              names.arg = M, horiz = F
+              , border = NA, xlim = range(0,10),las=2,axes = F,srt=45)
+val <- seq(0, 100, 20)  #creating Y-axis values
+text(bp, H+10 , paste(H, "%", sep="")) #automates data labels
+par(las=1) #positions y-axis labels horizontally
+axis(2, at = val, labels = paste0(val, '%') ) #add % to Y-axis
+#NOTE: SOMETIMES IT WILL NOT MAKE SENSE TO LABEL X-AXIS, JUST DELETE AXIS LABEL IN THOSE INSTANCES
+
+```

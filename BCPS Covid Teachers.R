@@ -22,6 +22,7 @@ bp <- barplot(H, col =c("dodgerblue3" ),  ylim = range(0,110),
               names.arg = M, horiz = F,
               family="Arial", border = NA, xlim = range(0,7), las=1,
               axes = F)
+bp <- barplot()
 
 text(bp, H + 5, paste(H, "%", sep="")) #Automates data labels
 

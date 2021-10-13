@@ -48,7 +48,7 @@ counts<- structure(list(
 attach(counts)
 
 print(counts)
-
+# update
 # barplot
 colors <- c("gray82", "dodgerblue3")
 counts <- counts[, order(colSums(counts))]

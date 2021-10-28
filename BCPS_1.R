@@ -65,7 +65,7 @@ legend(-70,8,  legend=c("Somewhat Agree","Strongly Agree"),       fill=colors, h
 # Graph 3
 library(ggpubr)
 
-                 
+  #add comment
 # Adding a comment here
 
 par(mar=c(5, 5, 5, 5) )  # this sets margins to allow long labels

@@ -15,7 +15,7 @@ shinyApp(
         # can happen when deployed).
         tempReport <- file.path(tempdir(), "report.Rmd")
         file.copy("report.Rmd", tempReport, overwrite = TRUE)
-        
+        # Adding another comment
         # Set up parameters to pass to Rmd document
         params <- list(
                        l = input$graph1, 

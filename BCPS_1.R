@@ -149,7 +149,7 @@ df %>%
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank()
   )
-
+## ADDING COMMENT ABOUT GRAPH ##
 ### GRAPH 6 ###
 par(mar=c(0, 15, 0, 0))
 
